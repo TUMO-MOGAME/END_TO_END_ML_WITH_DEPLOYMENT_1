@@ -4,5 +4,6 @@ seaborn
 matplotlib
 xgboost
 scikit-learn
+dill
  -e .
  
