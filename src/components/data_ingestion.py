@@ -1,67 +1,60 @@
-import os, sys
-from src.exception import ProjectException
+import os
+import sys
+from src.exception import CustomException
 from src.logger import logging
 import pandas as pd
 
 from sklearn.model_selection import train_test_split
 from dataclasses import dataclass
-from src.components.data_transformation import datatransformation
-from src.components.data_transformation import datatransformationConfig
 
-# in injestion wheever we perofming data injection component  thers should be some import like wrer you have to same raw data train data and test data and we save this data here
-# in calss data ingestion config 
+from src.components.data_transformation import DataTransformation
+from src.components.data_transformation import DataTransformationConfig
+
+from src.components.model_training import ModelTrainerConfig
+from src.components.model_training import ModelTrainer
 @dataclass
 class DataIngestionConfig:
-    train_data_path: str = os.path.join('artifacts', 'train.csv')
-    test_data_path: str = os.path.join('artifacts', 'test.csv')
-    raw_data_path: str = os.path.join('artifacts', 'data.csv')
-
-
+    train_data_path: str=os.path.join('artifacts',"train.csv")
+    test_data_path: str=os.path.join('artifacts',"test.csv")
+    raw_data_path: str=os.path.join('artifacts',"data.csv")
 
 class DataIngestion:
     def __init__(self):
-        # Initialize the ingestion configuration
         self.ingestion_config=DataIngestionConfig()
 
     def initiate_data_ingestion(self):
-        # This method will read data from a CSV file, split it into training and testing datasets, and save them
-        logging.info("Entered the data ingestion method/component.")
-        
+        logging.info("Entered the data ingestion method or component")
         try:
-            # Read the dataset into a dataframe from the provided file path
-            df = pd.read_csv('notebook/data/data.csv')
-            logging.info('Dataset read into DataFrame.')
+            df = pd.read_csv('notebook\\data\\data.csv')
+            logging.info('Read the dataset as dataframe')
 
-            # Create the necessary directories if they don't already exist
-            os.makedirs(os.path.dirname(self.ingestion_config.train_data_path), exist_ok=True)
+            os.makedirs(os.path.dirname(self.ingestion_config.train_data_path),exist_ok=True)
 
-            # Save the raw dataset to the specified path
-            df.to_csv(self.ingestion_config.raw_data_path, index=False, header=True)
-            logging.info('Raw dataset saved.')
+            df.to_csv(self.ingestion_config.raw_data_path,index=False,header=True)
 
-            # Split the dataset into training and testing sets (80/20 split)
-            logging.info("Train-test split initiated.")
-            train_set, test_set = train_test_split(df, test_size=0.2, random_state=42)
+            logging.info("Train test split initiated")
+            train_set,test_set=train_test_split(df,test_size=0.2,random_state=42)
 
-            # Save the train and test datasets to their respective paths
-            train_set.to_csv(self.ingestion_config.train_data_path, index=False, header=True)
-            test_set.to_csv(self.ingestion_config.test_data_path, index=False, header=True)
+            train_set.to_csv(self.ingestion_config.train_data_path,index=False,header=True)
 
-            logging.info("Data ingestion is complete.")
-            
-            # Return the paths to the training and testing data
-            return (
+            test_set.to_csv(self.ingestion_config.test_data_path,index=False,header=True)
+
+            logging.info("Inmgestion of the data iss completed")
+
+            return(
                 self.ingestion_config.train_data_path,
                 self.ingestion_config.test_data_path
+
             )
-        
         except Exception as e:
-            # If an error occurs, raise a custom exception
-            raise ProjectException(e, sys)
+            raise CustomException(e,sys)
         
 if __name__=="__main__":
     obj=DataIngestion()
-    train_data,test_data =obj.initiate_data_ingestion()
+    train_data,test_data=obj.initiate_data_ingestion()
 
-    data_transformation= datatransformation()
-    data_transformation.initiate_data_transformation(train_data,test_data)
+    data_transformation=DataTransformation()
+    train_arr,test_arr,_=data_transformation.initiate_data_transformation(train_data,test_data)
+
+    modeltrainer=ModelTrainer()
+    print(modeltrainer.initiate_model_trainer(train_arr,test_arr))
