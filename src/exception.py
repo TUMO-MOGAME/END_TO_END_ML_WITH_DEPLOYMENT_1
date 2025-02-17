@@ -1,5 +1,5 @@
 import sys
-#from src.logger import logger
+from src.logger import logging
 
 class ProjectException(Exception):
     def __init__(self, error_message, error_details: sys):
